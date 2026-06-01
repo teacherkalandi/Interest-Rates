@@ -1621,18 +1621,19 @@ export default function App() {
             </div>
 
             {!adminUser ? (
-              <div className="text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+              <div className="text-center py-16 justify-center flex flex-col items-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
                 <div className="text-4xl mb-4">🔐</div>
                 <h4 className="text-lg font-bold text-slate-800 mb-2">Admin Access Required</h4>
                 <p className="text-sm text-slate-500 max-w-sm mx-auto">Please sign in with authorized administrator credentials to update global interest rates.</p>
               </div>
+            ) : adminUser.email !== 'teacherkalandi@gmail.com' ? (
+              <div className="text-center py-16 justify-center flex flex-col items-center bg-red-50 rounded-xl border-2 border-dashed border-red-200">
+                <div className="text-4xl mb-4">⛔</div>
+                <h4 className="text-lg font-bold text-red-800 mb-2">Access Denied</h4>
+                <p className="text-sm text-red-600 max-w-sm mx-auto">You are logged in as <b>{adminUser.email}</b>. You do not have permission to view or modify the admin portal.</p>
+              </div>
             ) : (
               <div>
-                {adminUser.email !== 'teacherkalandi@gmail.com' && (
-                  <div className="mb-6 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 text-sm font-bold flex items-center gap-3">
-                    <span>⚠️</span> You are not recognized as the primary administrator. Cloud saves may be rejected depending on database rules.
-                  </div>
-                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {schemes.map((s: any, index: number) => (
                     <div key={s.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between hover:border-slate-300 transition-colors">

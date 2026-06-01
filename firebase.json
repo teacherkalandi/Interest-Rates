@@ -1,0 +1,8 @@
+{
+  "firestore": [
+    {
+      "database": "linksaver-pro-65ibq",
+      "rules": "firestore.rules"
+    }
+  ]
+}

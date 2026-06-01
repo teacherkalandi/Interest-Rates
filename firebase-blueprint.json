@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "RateSettings": {
+      "title": "Rate Settings",
+      "description": "Global interest rates configuration",
+      "type": "object",
+      "properties": {
+        "schemes": {
+          "type": "array",
+          "description": "List of schemes with their interest rates"
+        }
+      },
+      "required": ["schemes"]
+    }
+  },
+  "firestore": {
+    "settings/rates": {
+      "schema": "RateSettings",
+      "description": "Global database for POSB schemes and their interest rates"
+    }
+  }
+}
