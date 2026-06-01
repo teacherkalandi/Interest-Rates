@@ -1,7 +1,7 @@
 {
   "firestore": [
     {
-      "database": "linksaver-pro-65ibq",
+      "database": "ai-studio-b94936e8-5ea6-448e-8658-4f646939fd3e",
       "rules": "firestore.rules"
     }
   ]
