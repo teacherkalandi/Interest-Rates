@@ -664,6 +664,7 @@ export default function App() {
             invested: calc.invested,
             interest: calc.interest,
             total: calc.total,
+            monthlyInterest: calc.monthlyPayout,
             payoutDetails: `Guaranteed monthly payout of ${formatCurrency(calc.monthlyPayout)}`
           };
           break;
@@ -674,6 +675,7 @@ export default function App() {
             invested: calc.invested,
             interest: calc.interest,
             total: calc.total,
+            monthlyInterest: calc.quarterlyPayout / 3,
             payoutDetails: `Quarterly passive payout of ${formatCurrency(calc.quarterlyPayout)} (equivalent to ${formatCurrency(calc.quarterlyPayout / 3)} monthly)`
           };
           break;
@@ -758,8 +760,8 @@ export default function App() {
       <header className="bg-gradient-to-r from-red-700 via-red-800 to-rose-900 border-b-4 border-yellow-500 shadow-lg text-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-red-900 text-xl border-2 border-white shadow-inner flex-shrink-0">
-              ✉
+            <div className="w-12 h-12 bg-white/95 rounded-full flex items-center justify-center border-2 border-yellow-500 shadow-inner flex-shrink-0 overflow-hidden p-1">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem of India" className="h-full w-auto object-contain drop-shadow-sm" />
             </div>
             <div>
               <span className="text-yellow-400 font-bold block text-[10px] tracking-widest font-mono">भारतीय डाक | INDIA POST</span>
@@ -769,9 +771,10 @@ export default function App() {
             </div>
           </div>
 
-          {/* Navigation with horizontal touch sliding on mobile screens */}
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none flex-shrink-0">
-            <nav className="flex gap-1.5 bg-red-950/40 p-1.5 rounded-xl border border-red-500/10 min-w-max">
+          {/* Navigation and Logo container */}
+          <div className="flex items-center gap-4">
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none flex-shrink-0">
+              <nav className="flex gap-1.5 bg-red-950/40 p-1.5 rounded-xl border border-red-500/10 min-w-max">
               <button
                 onClick={() => setActiveTab('dashboard')}
                 className={`px-3 sm:px-4 py-2 md:py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${
@@ -828,8 +831,13 @@ export default function App() {
               </button>
             </nav>
           </div>
+          {/* India Post Logo - hidden on mobile to save space, visible on large screens */}
+          <div className="hidden lg:flex bg-white p-1 rounded-lg flex-shrink-0 shadow-sm ml-2 items-center justify-center">
+            <img src="https://upload.wikimedia.org/wikipedia/en/3/32/India_Post.svg" alt="India Post Logo" className="h-9 w-auto object-contain" />
+          </div>
         </div>
-      </header>
+      </div>
+    </header>
 
       {/* Main Interactive Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
@@ -1009,11 +1017,14 @@ export default function App() {
                     <div className="relative">
                       <span className="absolute left-3.5 top-3 text-slate-400 font-bold">₹</span>
                       <input
-                        type="number"
+                        type="text"
                         pattern="[0-9]*"
                         inputMode="numeric"
-                        value={monthlyContribution || ''}
-                        onChange={(e) => setMonthlyContribution(Number(e.target.value) || 0)}
+                        value={monthlyContribution}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+                          setMonthlyContribution(val === '' ? '' : Number(val));
+                        }}
                         className="w-full pl-8 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-600"
                       />
                     </div>
@@ -1025,11 +1036,14 @@ export default function App() {
                     <div className="relative">
                       <span className="absolute left-3.5 top-3 text-slate-400 font-bold">₹</span>
                       <input
-                        type="number"
+                        type="text"
                         pattern="[0-9]*"
                         inputMode="numeric"
-                        value={depositAmount || ''}
-                        onChange={(e) => setDepositAmount(Number(e.target.value) || 0)}
+                        value={depositAmount}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+                          setDepositAmount(val === '' ? '' : Number(val));
+                        }}
                         className="w-full pl-8 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-600"
                       />
                     </div>
@@ -1089,11 +1103,14 @@ export default function App() {
                           <div className="relative">
                             <span className="absolute left-3 top-3.5 sm:top-2.5 text-slate-400 font-bold text-sm">₹</span>
                             <input
-                              type="number"
+                              type="text"
                               pattern="[0-9]*"
                               inputMode="numeric"
-                              value={monthlyContribution || ''}
-                              onChange={(e) => setMonthlyContribution(Number(e.target.value) || 0)}
+                              value={monthlyContribution}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+                                setMonthlyContribution(val === '' ? '' : Number(val));
+                              }}
                               className="w-full pl-7 pr-3 py-3 sm:py-2 border border-slate-300 rounded-lg text-sm sm:text-xs focus:outline-none focus:ring-2 focus:ring-red-600 font-bold"
                             />
                           </div>
@@ -1104,11 +1121,14 @@ export default function App() {
                           <div className="relative">
                             <span className="absolute left-3 top-3.5 sm:top-2.5 text-slate-400 font-bold text-sm">₹</span>
                             <input
-                              type="number"
+                              type="text"
                               pattern="[0-9]*"
                               inputMode="numeric"
-                              value={depositAmount || ''}
-                              onChange={(e) => setDepositAmount(Number(e.target.value) || 0)}
+                              value={depositAmount}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+                                setDepositAmount(val === '' ? '' : Number(val));
+                              }}
                               className="w-full pl-7 pr-3 py-3 sm:py-2 border border-slate-300 rounded-lg text-sm sm:text-xs focus:outline-none focus:ring-2 focus:ring-red-600 font-bold"
                             />
                           </div>
@@ -1178,16 +1198,22 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-3 gap-3 border-b border-slate-100 text-center">
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-150">
+                <div className={`p-4 md:p-6 grid grid-cols-1 ${computations.monthlyInterest ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-3 border-b border-slate-100 text-center`}>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-150 flex flex-col justify-center">
                     <span className="text-[10px] text-slate-400 uppercase font-black block mb-1">Principal Invested</span>
                     <span className="text-base md:text-lg font-extrabold text-slate-800">{formatCurrency(computations.invested)}</span>
                   </div>
-                  <div className="p-3 bg-red-50/50 rounded-xl border border-red-100">
+                  {computations.monthlyInterest && (
+                    <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 flex flex-col justify-center">
+                      <span className="text-[10px] text-amber-500 uppercase font-black block mb-1">Monthly Interest</span>
+                      <span className="text-base md:text-lg font-extrabold text-amber-600">{formatCurrency(computations.monthlyInterest)}</span>
+                    </div>
+                  )}
+                  <div className="p-3 bg-red-50/50 rounded-xl border border-red-100 flex flex-col justify-center">
                     <span className="text-[10px] text-red-400 uppercase font-black block mb-1">Accrued Interest</span>
                     <span className="text-base md:text-lg font-extrabold text-red-700">+{formatCurrency(computations.interest)}</span>
                   </div>
-                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col justify-center">
                     <span className="text-[10px] text-emerald-500 uppercase font-black block mb-1">Total Maturity</span>
                     <span className="text-lg md:text-xl font-black text-emerald-700">{formatCurrency(computations.total)}</span>
                   </div>
@@ -1273,11 +1299,14 @@ export default function App() {
                 <div className="relative">
                   <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₹</span>
                   <input
-                    type="number"
+                    type="text"
                     pattern="[0-9]*"
                     inputMode="numeric"
                     value={depositAmount}
-                    onChange={(e) => setDepositAmount(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+                      setDepositAmount(val === '' ? '' : Number(val));
+                    }}
                     className="w-full pl-7 pr-3 py-2 border rounded-lg text-sm font-bold focus:ring-2 focus:ring-red-600"
                   />
                 </div>
@@ -1682,7 +1711,6 @@ export default function App() {
           <div>
             <span className="text-yellow-400 font-black tracking-widest block text-[10px] uppercase font-mono mb-2">Official Desk Support</span>
             <p className="mb-2 leading-relaxed text-[11px]">For exact ledger validations, please reach your nearest India Post Office branch.</p>
-            <p className="text-[11px]"><strong>Customer Care:</strong> 1800-266-6868 <span className="text-[10px] text-slate-500">(9 AM to 6 PM IST)</span></p>
           </div>
 
           <div>
