@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { db, auth, googleProvider } from './firebase';
@@ -410,6 +411,7 @@ SCHEME_DETAILS_DATA.TD5 = SCHEME_DETAILS_DATA.TD3 = SCHEME_DETAILS_DATA.TD2 = SC
 };
 
 export default function App() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [schemes, setSchemes] = useState(INITIAL_SCHEME_DATA);
   const [adminUser, setAdminUser] = useState<User | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -664,7 +666,6 @@ export default function App() {
             invested: calc.invested,
             interest: calc.interest,
             total: calc.total,
-            monthlyInterest: calc.monthlyPayout,
             payoutDetails: `Guaranteed monthly payout of ${formatCurrency(calc.monthlyPayout)}`
           };
           break;
@@ -675,7 +676,6 @@ export default function App() {
             invested: calc.invested,
             interest: calc.interest,
             total: calc.total,
-            monthlyInterest: calc.quarterlyPayout / 3,
             payoutDetails: `Quarterly passive payout of ${formatCurrency(calc.quarterlyPayout)} (equivalent to ${formatCurrency(calc.quarterlyPayout / 3)} monthly)`
           };
           break;
@@ -754,26 +754,38 @@ export default function App() {
   }, [advisorProfile, advisorGoal]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans antialiased">
-      
-      {/* Header Banner - Mobile optimized with responsive padding */}
-      <header className="bg-gradient-to-r from-red-700 via-red-800 to-rose-900 border-b-4 border-yellow-500 shadow-lg text-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/95 rounded-full flex items-center justify-center border-2 border-yellow-500 shadow-inner flex-shrink-0 overflow-hidden p-1">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem of India" className="h-full w-auto object-contain drop-shadow-sm" />
+    <div className={isDarkMode ? 'dark' : ''}>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 dark:text-slate-100 flex flex-col font-sans antialiased transition-colors duration-200">
+        
+        {/* Header Banner - Mobile optimized with responsive padding */}
+        <header className="bg-gradient-to-r from-red-700 via-red-800 to-rose-900 dark:from-red-900 dark:via-red-950 dark:to-black border-b-4 border-yellow-500 shadow-lg text-white sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center justify-between w-full md:w-auto">
+              <div className="flex items-center gap-3">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/en/3/32/India_Post.svg" 
+                  alt="India Post Logo" 
+                  className="w-12 h-12 object-contain bg-white dark:bg-slate-800 rounded-full p-1 border-2 border-yellow-500 flex-shrink-0" 
+                  referrerPolicy="no-referrer"
+                />
+                <div>
+                  <span className="text-yellow-400 font-bold block text-[10px] tracking-widest font-mono">भारतीय डाक | INDIA POST</span>
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-black tracking-tight flex items-center gap-1.5">
+                    POSB Financial Suite
+                  </h1>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2 rounded-full hover:bg-white/10 transition-colors shrink-0 md:ml-4"
+                aria-label="Toggle Theme"
+              >
+                {isDarkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-slate-200" />}
+              </button>
             </div>
-            <div>
-              <span className="text-yellow-400 font-bold block text-[10px] tracking-widest font-mono">भारतीय डाक | INDIA POST</span>
-              <h1 className="text-lg sm:text-xl md:text-2xl font-black tracking-tight flex items-center gap-1.5">
-                POSB Financial Suite <span className="text-[9px] bg-red-600 px-2 py-0.5 rounded-full border border-red-500">2026 Q1</span>
-              </h1>
-            </div>
-          </div>
 
-          {/* Navigation and Logo container */}
-          <div className="flex items-center gap-4">
-            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none flex-shrink-0">
+            {/* Navigation with horizontal touch sliding on mobile screens */}
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none flex-shrink-0 flex items-center gap-4">
               <nav className="flex gap-1.5 bg-red-950/40 p-1.5 rounded-xl border border-red-500/10 min-w-max">
               <button
                 onClick={() => setActiveTab('dashboard')}
@@ -831,24 +843,19 @@ export default function App() {
               </button>
             </nav>
           </div>
-          {/* India Post Logo - hidden on mobile to save space, visible on large screens */}
-          <div className="hidden lg:flex bg-white p-1 rounded-lg flex-shrink-0 shadow-sm ml-2 items-center justify-center">
-            <img src="https://upload.wikimedia.org/wikipedia/en/3/32/India_Post.svg" alt="India Post Logo" className="h-9 w-auto object-contain" />
-          </div>
         </div>
-      </div>
-    </header>
+      </header>
 
       {/* Main Interactive Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
         
         {/* Internet Banking Alert Banner */}
-        <div className="mb-4 bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="mb-4 bg-blue-50 dark:bg-indigo-900/30 border-l-4 border-blue-600 p-4 rounded-r-lg shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div className="flex items-start gap-3">
             <span className="text-xl md:text-2xl mt-0.5">🌐</span>
             <div>
-              <p className="font-bold text-blue-900 text-sm">Internet &amp; Mobile Banking Support</p>
-              <p className="text-xs text-blue-700">Link your Post Office Savings Account at your nearest branch. Official POSB IFSC: <span className="font-mono bg-blue-100 px-1 py-0.5 rounded font-bold">IPOS0000DOP</span></p>
+              <p className="font-bold text-blue-900 dark:text-blue-200 text-sm">Internet &amp; Mobile Banking Support</p>
+              <p className="text-xs text-blue-700 dark:text-blue-400">Link your Post Office Savings Account at your nearest branch. Official POSB IFSC: <span className="font-mono bg-blue-100 dark:bg-blue-900/50 px-1 py-0.5 rounded font-bold">IPOS0000DOP</span></p>
             </div>
           </div>
           <a
@@ -865,14 +872,14 @@ export default function App() {
         {activeTab === 'dashboard' && (
           <div>
             {/* Filtering Control Bar */}
-            <div className="bg-white rounded-xl shadow-md p-4 mb-6 border border-slate-200 flex flex-col md:flex-row items-stretch justify-between gap-3">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 mb-6 border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-stretch justify-between gap-3">
               <div className="relative flex-1">
                 <input
                   type="text"
                   placeholder="Search scheme name or code (e.g. SSA, NSC)..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
+                  className="w-full pl-9 pr-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
                 />
                 <span className="absolute left-3 top-3 text-slate-400 text-sm">🔍</span>
               </div>
@@ -881,7 +888,7 @@ export default function App() {
                 <select
                   value={filterTax}
                   onChange={(e) => setFilterTax(e.target.value)}
-                  className="px-3 py-2.5 border border-slate-300 rounded-lg text-xs font-semibold bg-white focus:outline-none"
+                  className="px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-semibold bg-white dark:bg-slate-800 focus:outline-none"
                 >
                   <option value="All">All Tax Classes</option>
                   <option value="Tax Saving">Section 80C Compliant</option>
@@ -891,7 +898,7 @@ export default function App() {
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="px-3 py-2.5 border border-slate-300 rounded-lg text-xs font-semibold bg-white focus:outline-none"
+                  className="px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-semibold bg-white dark:bg-slate-800 focus:outline-none"
                 >
                   <option value="All">All Durations</option>
                   <option value="Lump Sum">Lump Sum (One-time)</option>
@@ -906,7 +913,7 @@ export default function App() {
               {filteredSchemes.map((s) => (
                 <div
                   key={s.id}
-                  className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden hover:shadow-xl transition-all flex flex-col justify-between"
+                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-xl transition-all flex flex-col justify-between"
                 >
                   <div>
                     <div className={`bg-gradient-to-r ${s.color} p-4 text-white relative`}>
@@ -915,46 +922,46 @@ export default function App() {
                       <h3 className="font-black text-base leading-tight pr-12">{s.name}</h3>
                     </div>
 
-                    <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                       <div>
                         <span className="text-xs text-slate-500 block">Annual Interest</span>
                         <span className="text-2xl font-extrabold text-red-700 tracking-tight">{s.rate}% <span className="text-xs font-normal text-slate-500">p.a.</span></span>
                       </div>
                       <div className="text-right">
                         <span className="text-xs text-slate-500 block">Locking/Tenure</span>
-                        <span className="text-xs font-bold text-slate-700">{s.tenure}</span>
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{s.tenure}</span>
                       </div>
                     </div>
 
-                    <div className="p-4 space-y-3 text-xs text-slate-600">
+                    <div className="p-4 space-y-3 text-xs text-slate-600 dark:text-slate-400">
                       <p className="italic text-slate-500 leading-relaxed">"{s.suitability}"</p>
                       
-                      <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+                      <div className="grid grid-cols-2 gap-2 border-t border-slate-100 dark:border-slate-700 pt-3">
                         <div>
                           <span className="text-[10px] text-slate-400 uppercase font-semibold block">Min Deposit</span>
-                          <span className="font-bold text-slate-800">{formatCurrency(s.minDeposit)}</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">{formatCurrency(s.minDeposit)}</span>
                         </div>
                         <div>
                           <span className="text-[10px] text-slate-400 uppercase font-semibold block">Max Deposit</span>
-                          <span className="font-bold text-slate-800">{s.maxDeposit === Infinity ? 'Unlimited' : formatCurrency(s.maxDeposit)}</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">{s.maxDeposit === Infinity ? 'Unlimited' : formatCurrency(s.maxDeposit)}</span>
                         </div>
                       </div>
 
-                      <div className="border-t border-slate-100 pt-3">
+                      <div className="border-t border-slate-100 dark:border-slate-700 pt-3">
                         <span className="text-[10px] text-slate-400 uppercase font-semibold block">Compounding Interval</span>
-                        <span className="font-semibold text-slate-700">{s.compounding}</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{s.compounding}</span>
                       </div>
 
-                      <div className="flex justify-between items-center border-t border-slate-100 pt-3">
+                      <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-700 pt-3">
                         <span className="text-[10px] text-slate-400 uppercase font-semibold">Tax Benefits (80C)</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.taxSaving.startsWith('Yes') ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.taxSaving.startsWith('Yes') ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
                           {s.taxSaving}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 border-t border-slate-100">
+                  <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700">
                     <button
                       onClick={() => {
                         setSelectedSchemeId(s.id);
@@ -970,7 +977,7 @@ export default function App() {
                         setSelectedRuleScheme(s);
                         setActiveTab('rules');
                       }}
-                      className="w-full mt-2 bg-slate-200 text-slate-700 hover:bg-slate-300 transition font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5"
+                      className="w-full mt-2 bg-slate-200 text-slate-700 dark:text-slate-300 hover:bg-slate-300 transition font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5"
                     >
                       📖 View Scheme Rules
                     </button>
@@ -987,8 +994,8 @@ export default function App() {
             
             {/* Configuration side panel */}
             <div className="lg:col-span-5 space-y-4 md:space-y-6">
-              <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-4 md:p-6">
-                <h3 className="text-sm font-black text-slate-800 border-b pb-3 mb-4 uppercase tracking-wider text-red-800 flex items-center gap-1.5">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4 md:p-6">
+                <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 border-b pb-3 mb-4 uppercase tracking-wider text-red-800 flex items-center gap-1.5">
                   🔧 Configuration Panel
                 </h3>
 
@@ -1001,7 +1008,7 @@ export default function App() {
                       setSelectedSchemeId(e.target.value);
                       setReinvestmentCombo('none'); 
                     }}
-                    className="w-full px-3 py-3 border border-slate-300 rounded-lg text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                    className="w-full px-3 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-semibold bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-red-600"
                   >
                     {schemes.map((s: any) => (
                       <option key={s.id} value={s.id}>{s.id} - {s.name} ({s.rate}%)</option>
@@ -1017,15 +1024,12 @@ export default function App() {
                     <div className="relative">
                       <span className="absolute left-3.5 top-3 text-slate-400 font-bold">₹</span>
                       <input
-                        type="text"
+                        type="number"
                         pattern="[0-9]*"
                         inputMode="numeric"
-                        value={monthlyContribution}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-                          setMonthlyContribution(val === '' ? '' : Number(val));
-                        }}
-                        className="w-full pl-8 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-600"
+                        value={monthlyContribution || ''}
+                        onChange={(e) => setMonthlyContribution(Number(e.target.value) || 0)}
+                        className="w-full pl-8 pr-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-600"
                       />
                     </div>
                   </div>
@@ -1036,15 +1040,12 @@ export default function App() {
                     <div className="relative">
                       <span className="absolute left-3.5 top-3 text-slate-400 font-bold">₹</span>
                       <input
-                        type="text"
+                        type="number"
                         pattern="[0-9]*"
                         inputMode="numeric"
-                        value={depositAmount}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-                          setDepositAmount(val === '' ? '' : Number(val));
-                        }}
-                        className="w-full pl-8 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-600"
+                        value={depositAmount || ''}
+                        onChange={(e) => setDepositAmount(Number(e.target.value) || 0)}
+                        className="w-full pl-8 pr-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-600"
                       />
                     </div>
                   </div>
@@ -1052,9 +1053,9 @@ export default function App() {
 
                 {/* RD tenure extension panel */}
                 {selectedSchemeId === 'RD' && (
-                  <div className="mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  <div className="mb-4 bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tenure Extension Configuration</label>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
                       <span>Standard 5 Years</span>
                       <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded font-mono">{rdTenureYears} Years</span>
                     </div>
@@ -1073,7 +1074,7 @@ export default function App() {
 
                 {/* PPF & Sukanya Contribution Mode Selector */}
                 {(selectedSchemeId === 'PPF' || selectedSchemeId === 'SSA') && (
-                  <div className="mb-4 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+                  <div className="mb-4 bg-slate-50 dark:bg-slate-900 p-3.5 rounded-lg border border-slate-200 dark:border-slate-700">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Deposit Frequency Mode</label>
                     <div className="grid grid-cols-2 gap-2 mt-1">
                       <button
@@ -1081,7 +1082,7 @@ export default function App() {
                           setPpfSsaMode('monthly');
                           setMonthlyContribution(1000);
                         }}
-                        className={`py-2.5 md:py-2 rounded-lg text-xs font-bold transition flex items-center justify-center ${ppfSsaMode === 'monthly' ? 'bg-red-700 text-white shadow-sm' : 'bg-white hover:bg-slate-200 text-slate-600 border'}`}
+                        className={`py-2.5 md:py-2 rounded-lg text-xs font-bold transition flex items-center justify-center ${ppfSsaMode === 'monthly' ? 'bg-red-700 text-white shadow-sm' : 'bg-white dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-400 border'}`}
                       >
                         Monthly SIP
                       </button>
@@ -1090,7 +1091,7 @@ export default function App() {
                           setPpfSsaMode('yearly');
                           setDepositAmount(15000);
                         }}
-                        className={`py-2.5 md:py-2 rounded-lg text-xs font-bold transition flex items-center justify-center ${ppfSsaMode === 'yearly' ? 'bg-red-700 text-white shadow-sm' : 'bg-white hover:bg-slate-200 text-slate-600 border'}`}
+                        className={`py-2.5 md:py-2 rounded-lg text-xs font-bold transition flex items-center justify-center ${ppfSsaMode === 'yearly' ? 'bg-red-700 text-white shadow-sm' : 'bg-white dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-400 border'}`}
                       >
                         Annual Lump Sum
                       </button>
@@ -1099,37 +1100,31 @@ export default function App() {
                     <div className="mt-4 border-t pt-4">
                       {ppfSsaMode === 'monthly' ? (
                         <div>
-                          <label className="text-xs font-bold text-slate-600 block mb-1.5">Monthly Contribution Amount</label>
+                          <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-1.5">Monthly Contribution Amount</label>
                           <div className="relative">
                             <span className="absolute left-3 top-3.5 sm:top-2.5 text-slate-400 font-bold text-sm">₹</span>
                             <input
-                              type="text"
+                              type="number"
                               pattern="[0-9]*"
                               inputMode="numeric"
-                              value={monthlyContribution}
-                              onChange={(e) => {
-                                const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-                                setMonthlyContribution(val === '' ? '' : Number(val));
-                              }}
-                              className="w-full pl-7 pr-3 py-3 sm:py-2 border border-slate-300 rounded-lg text-sm sm:text-xs focus:outline-none focus:ring-2 focus:ring-red-600 font-bold"
+                              value={monthlyContribution || ''}
+                              onChange={(e) => setMonthlyContribution(Number(e.target.value) || 0)}
+                              className="w-full pl-7 pr-3 py-3 sm:py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm sm:text-xs focus:outline-none focus:ring-2 focus:ring-red-600 font-bold"
                             />
                           </div>
                         </div>
                       ) : (
                         <div>
-                          <label className="text-xs font-bold text-slate-600 block mb-1.5">Yearly Contribution Amount</label>
+                          <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-1.5">Yearly Contribution Amount</label>
                           <div className="relative">
                             <span className="absolute left-3 top-3.5 sm:top-2.5 text-slate-400 font-bold text-sm">₹</span>
                             <input
-                              type="text"
+                              type="number"
                               pattern="[0-9]*"
                               inputMode="numeric"
-                              value={depositAmount}
-                              onChange={(e) => {
-                                const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-                                setDepositAmount(val === '' ? '' : Number(val));
-                              }}
-                              className="w-full pl-7 pr-3 py-3 sm:py-2 border border-slate-300 rounded-lg text-sm sm:text-xs focus:outline-none focus:ring-2 focus:ring-red-600 font-bold"
+                              value={depositAmount || ''}
+                              onChange={(e) => setDepositAmount(Number(e.target.value) || 0)}
+                              className="w-full pl-7 pr-3 py-3 sm:py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm sm:text-xs focus:outline-none focus:ring-2 focus:ring-red-600 font-bold"
                             />
                           </div>
                         </div>
@@ -1148,13 +1143,13 @@ export default function App() {
                       <div className="flex flex-col sm:flex-row gap-2.5">
                         <button
                           onClick={() => setReinvestmentCombo('none')}
-                          className={`w-full py-3 sm:py-2.5 rounded-lg text-xs font-bold border transition ${reinvestmentCombo === 'none' ? 'bg-amber-600 text-white border-amber-600 shadow' : 'bg-white border-amber-300 text-amber-800 hover:bg-amber-100'}`}
+                          className={`w-full py-3 sm:py-2.5 rounded-lg text-xs font-bold border transition ${reinvestmentCombo === 'none' ? 'bg-amber-600 text-white border-amber-600 shadow' : 'bg-white dark:bg-slate-800 border-amber-300 text-amber-800 hover:bg-amber-100'}`}
                         >
                           Standard MIS Payout
                         </button>
                         <button
                           onClick={() => setReinvestmentCombo('MIS_RD')}
-                          className={`w-full py-3 sm:py-2.5 rounded-lg text-xs font-bold border transition ${reinvestmentCombo === 'MIS_RD' ? 'bg-amber-600 text-white border-amber-600 shadow' : 'bg-white border-amber-300 text-amber-800 hover:bg-amber-100'}`}
+                          className={`w-full py-3 sm:py-2.5 rounded-lg text-xs font-bold border transition ${reinvestmentCombo === 'MIS_RD' ? 'bg-amber-600 text-white border-amber-600 shadow' : 'bg-white dark:bg-slate-800 border-amber-300 text-amber-800 hover:bg-amber-100'}`}
                         >
                           MIS + RD Reinvestment
                         </button>
@@ -1165,13 +1160,13 @@ export default function App() {
                       <div className="flex flex-col sm:flex-row gap-2.5">
                         <button
                           onClick={() => setReinvestmentCombo('none')}
-                          className={`w-full py-3 sm:py-2.5 rounded-lg text-xs font-bold border transition ${reinvestmentCombo === 'none' ? 'bg-amber-600 text-white border-amber-600 shadow' : 'bg-white border-amber-300 text-amber-800 hover:bg-amber-100'}`}
+                          className={`w-full py-3 sm:py-2.5 rounded-lg text-xs font-bold border transition ${reinvestmentCombo === 'none' ? 'bg-amber-600 text-white border-amber-600 shadow' : 'bg-white dark:bg-slate-800 border-amber-300 text-amber-800 hover:bg-amber-100'}`}
                         >
                           Standard SCSS Payout
                         </button>
                         <button
                           onClick={() => setReinvestmentCombo('SCSS_RD')}
-                          className={`w-full py-3 sm:py-2.5 rounded-lg text-xs font-bold border transition ${reinvestmentCombo === 'SCSS_RD' ? 'bg-amber-600 text-white border-amber-600 shadow' : 'bg-white border-amber-300 text-amber-800 hover:bg-amber-100'}`}
+                          className={`w-full py-3 sm:py-2.5 rounded-lg text-xs font-bold border transition ${reinvestmentCombo === 'SCSS_RD' ? 'bg-amber-600 text-white border-amber-600 shadow' : 'bg-white dark:bg-slate-800 border-amber-300 text-amber-800 hover:bg-amber-100'}`}
                         >
                           SCSS + RD Sweep
                         </button>
@@ -1185,7 +1180,7 @@ export default function App() {
             {/* Analytical Performance Panel */}
             <div className="lg:col-span-7 space-y-6">
               
-              <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div className={`bg-gradient-to-r ${computations.scheme.color} p-4 text-white flex justify-between items-center`}>
                   <div>
                     <h3 className="font-extrabold text-sm md:text-base leading-tight">Maturity Projections</h3>
@@ -1198,31 +1193,25 @@ export default function App() {
                   )}
                 </div>
 
-                <div className={`p-4 md:p-6 grid grid-cols-1 ${computations.monthlyInterest ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-3 border-b border-slate-100 text-center`}>
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-150 flex flex-col justify-center">
+                <div className="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-3 gap-3 border-b border-slate-100 dark:border-slate-700 text-center">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-150">
                     <span className="text-[10px] text-slate-400 uppercase font-black block mb-1">Principal Invested</span>
-                    <span className="text-base md:text-lg font-extrabold text-slate-800">{formatCurrency(computations.invested)}</span>
+                    <span className="text-base md:text-lg font-extrabold text-slate-800 dark:text-slate-200">{formatCurrency(computations.invested)}</span>
                   </div>
-                  {computations.monthlyInterest && (
-                    <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 flex flex-col justify-center">
-                      <span className="text-[10px] text-amber-500 uppercase font-black block mb-1">Monthly Interest</span>
-                      <span className="text-base md:text-lg font-extrabold text-amber-600">{formatCurrency(computations.monthlyInterest)}</span>
-                    </div>
-                  )}
-                  <div className="p-3 bg-red-50/50 rounded-xl border border-red-100 flex flex-col justify-center">
+                  <div className="p-3 bg-red-50 dark:bg-red-900/30/50 rounded-xl border border-red-100">
                     <span className="text-[10px] text-red-400 uppercase font-black block mb-1">Accrued Interest</span>
                     <span className="text-base md:text-lg font-extrabold text-red-700">+{formatCurrency(computations.interest)}</span>
                   </div>
-                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col justify-center">
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl border border-emerald-100">
                     <span className="text-[10px] text-emerald-500 uppercase font-black block mb-1">Total Maturity</span>
                     <span className="text-lg md:text-xl font-black text-emerald-700">{formatCurrency(computations.total)}</span>
                   </div>
                 </div>
 
                 {computations.payoutDetails && (
-                  <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-600 font-bold">Accrued Plan / Payouts:</span>
-                    <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full font-black text-xs md:text-sm">{computations.payoutDetails}</span>
+                  <div className="p-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs">
+                    <span className="text-slate-600 dark:text-slate-400 font-bold">Accrued Plan / Payouts:</span>
+                    <span className="bg-red-100 dark:bg-red-900/50 text-red-800 px-3 py-1 rounded-full font-black text-xs md:text-sm">{computations.payoutDetails}</span>
                   </div>
                 )}
 
@@ -1248,8 +1237,8 @@ export default function App() {
 
               {/* Step-by-Step Schedule Matrix with swipe bounds for mobile */}
               {(selectedSchemeId === 'PPF' || selectedSchemeId === 'SSA') && computations.schedule && (
-                <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-4 md:p-6">
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b pb-2.5 mb-2 flex items-center justify-between">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4 md:p-6">
+                  <h4 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest border-b pb-2.5 mb-2 flex items-center justify-between">
                     <span>📅 Compounding Progression</span>
                     <span className="text-[9px] text-red-600 font-bold normal-case animate-pulse sm:hidden">Swipe Left to view →</span>
                   </h4>
@@ -1257,19 +1246,19 @@ export default function App() {
                     <table className="w-full text-xs text-left min-w-[500px]">
                       <thead className="bg-slate-100 sticky top-0 border-b">
                         <tr>
-                          <th className="p-3 text-slate-600 font-bold">Year No.</th>
-                          <th className="p-3 text-slate-600 font-bold">Cumulative Deposit</th>
-                          <th className="p-3 text-slate-600 font-bold">Interest Earned This Year</th>
-                          <th className="p-3 text-slate-600 font-bold">Closing Balance</th>
+                          <th className="p-3 text-slate-600 dark:text-slate-400 font-bold">Year No.</th>
+                          <th className="p-3 text-slate-600 dark:text-slate-400 font-bold">Cumulative Deposit</th>
+                          <th className="p-3 text-slate-600 dark:text-slate-400 font-bold">Interest Earned This Year</th>
+                          <th className="p-3 text-slate-600 dark:text-slate-400 font-bold">Closing Balance</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y">
                         {computations.schedule.map((row) => (
-                          <tr key={row.year} className="hover:bg-slate-50">
+                          <tr key={row.year} className="hover:bg-slate-50 dark:bg-slate-900">
                             <td className="p-3 font-mono font-bold text-slate-500">Year {row.year}</td>
-                            <td className="p-3 font-medium text-slate-700">{formatCurrency(row.cumulativeInvested)}</td>
+                            <td className="p-3 font-medium text-slate-700 dark:text-slate-300">{formatCurrency(row.cumulativeInvested)}</td>
                             <td className="p-3 font-bold text-red-600 font-mono">+{formatCurrency(row.interestThisYear)}</td>
-                            <td className="p-3 font-bold text-slate-800">{formatCurrency(row.closingBalance)}</td>
+                            <td className="p-3 font-bold text-slate-800 dark:text-slate-200">{formatCurrency(row.closingBalance)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1286,9 +1275,9 @@ export default function App() {
         {activeTab === 'compare' && (
           <div className="space-y-4 md:space-y-6">
             
-            <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-4 md:p-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4 md:p-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider text-red-800 mb-1">
+                <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider text-red-800 mb-1">
                   ⚖ Comparative Return Engine
                 </h3>
                 <p className="text-xs text-slate-500">Simulate final values across all 12 Indian Post Office schemes simultaneously.</p>
@@ -1299,21 +1288,18 @@ export default function App() {
                 <div className="relative">
                   <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₹</span>
                   <input
-                    type="text"
+                    type="number"
                     pattern="[0-9]*"
                     inputMode="numeric"
                     value={depositAmount}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-                      setDepositAmount(val === '' ? '' : Number(val));
-                    }}
+                    onChange={(e) => setDepositAmount(Number(e.target.value))}
                     className="w-full pl-7 pr-3 py-2 border rounded-lg text-sm font-bold focus:ring-2 focus:ring-red-600"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-4 md:p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4 md:p-6">
               <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-6">Visual Return Yield comparison for {formatCurrency(depositAmount)}</h4>
               
               <div className="space-y-4">
@@ -1349,16 +1335,16 @@ export default function App() {
                     <div key={s.id} className="group">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs mb-1.5 gap-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-black text-[10px]">{s.id}</span>
-                          <span className="font-bold text-slate-700">{s.name}</span>
+                          <span className="font-mono bg-slate-100 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded font-black text-[10px]">{s.id}</span>
+                          <span className="font-bold text-slate-700 dark:text-slate-300">{s.name}</span>
                           <span className="text-slate-400 font-mono">({s.rate}%)</span>
                         </div>
-                        <div className="text-right font-black text-slate-800">
+                        <div className="text-right font-black text-slate-800 dark:text-slate-200">
                           {formatCurrency(finalMaturity)}
                         </div>
                       </div>
 
-                      <div className="w-full bg-slate-100 h-6 rounded-md overflow-hidden relative border border-slate-200/50 flex items-center">
+                      <div className="w-full bg-slate-100 h-6 rounded-md overflow-hidden relative border border-slate-200 dark:border-slate-700/50 flex items-center">
                         <div
                           style={{ width: `${barWidth}%` }}
                           className={`bg-gradient-to-r ${s.color} h-full transition-all duration-700 flex items-center justify-between px-3`}
@@ -1368,7 +1354,7 @@ export default function App() {
                           </span>
                         </div>
                         {s.taxSaving.startsWith('Yes') && (
-                          <span className="absolute right-2 text-[8px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold uppercase scale-90 sm:scale-100">
+                          <span className="absolute right-2 text-[8px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 px-1.5 py-0.5 rounded font-bold uppercase scale-90 sm:scale-100">
                             80C
                           </span>
                         )}
@@ -1386,15 +1372,15 @@ export default function App() {
         {activeTab === 'advisor' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
             
-            <div className="lg:col-span-5 bg-white rounded-2xl shadow-md border border-slate-200 p-4 md:p-6">
-              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider text-red-800 border-b pb-3 mb-4">
+            <div className="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4 md:p-6">
+              <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider text-red-800 border-b pb-3 mb-4">
                 🧙 Advisor Settings
               </h3>
 
               <div className="mb-4">
                 <label className="text-xs font-black text-slate-500 uppercase tracking-wider block mb-3">1. Primary Investor Profile</label>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                  <label className="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50 dark:bg-slate-900 cursor-pointer transition">
                     <input
                       type="radio"
                       name="advisorProfile"
@@ -1403,12 +1389,12 @@ export default function App() {
                       className="accent-red-700 h-4 w-4"
                     />
                     <div>
-                      <span className="text-xs font-bold text-slate-800 block">General Public</span>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">General Public</span>
                       <span className="text-[10px] text-slate-500">Below 60 years of age</span>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                  <label className="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50 dark:bg-slate-900 cursor-pointer transition">
                     <input
                       type="radio"
                       name="advisorProfile"
@@ -1417,12 +1403,12 @@ export default function App() {
                       className="accent-red-700 h-4 w-4"
                     />
                     <div>
-                      <span className="text-xs font-bold text-slate-800 block">Senior Citizen</span>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Senior Citizen</span>
                       <span className="text-[10px] text-slate-500">Age 60+ (or 55+ with retirement specs)</span>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                  <label className="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50 dark:bg-slate-900 cursor-pointer transition">
                     <input
                       type="radio"
                       name="advisorProfile"
@@ -1431,7 +1417,7 @@ export default function App() {
                       className="accent-red-700 h-4 w-4"
                     />
                     <div>
-                      <span className="text-xs font-bold text-slate-800 block">Girl Child Parent</span>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Girl Child Parent</span>
                       <span className="text-[10px] text-slate-500">Daughter is below 10 years of age</span>
                     </div>
                   </label>
@@ -1443,7 +1429,7 @@ export default function App() {
                 <select
                   value={advisorGoal}
                   onChange={(e) => setAdvisorGoal(e.target.value)}
-                  className="w-full px-3 py-3 border rounded-lg text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                  className="w-full px-3 py-3 border rounded-lg text-xs font-bold bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-red-600"
                 >
                   <option value="Wealth">Long-term Guaranteed Capital Appreciation</option>
                   <option value="MonthlyIncome">Steady Monthly/Quarterly Passive Income</option>
@@ -1455,8 +1441,8 @@ export default function App() {
             </div>
 
             <div className="lg:col-span-7 space-y-4">
-              <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-4 md:p-6">
-                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider text-emerald-800 border-b pb-3 mb-4">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4 md:p-6">
+                <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider text-emerald-800 border-b pb-3 mb-4">
                   ✨ Matches &amp; Recommendations
                 </h3>
 
@@ -1464,18 +1450,18 @@ export default function App() {
                   {advisorRecommendations.map((s) => (
                     <div
                       key={s.id}
-                      className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/40 relative flex flex-col md:flex-row gap-4 items-start justify-between"
+                      className="p-4 rounded-xl border border-emerald-100 bg-emerald-50 dark:bg-emerald-900/30/40 relative flex flex-col md:flex-row gap-4 items-start justify-between"
                     >
                       <div className="space-y-2">
                         <div className="flex items-center gap-1.5">
                           <span className="bg-emerald-600 text-white font-black text-[10px] px-2 py-0.5 rounded font-mono">{s.id}</span>
-                          <h4 className="font-bold text-slate-800 text-sm">{s.name}</h4>
+                          <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">{s.name}</h4>
                         </div>
-                        <p className="text-xs text-slate-600 leading-relaxed italic">"{s.suitability}"</p>
-                        <p className="text-[10.5px] text-slate-500"><strong className="text-slate-600 font-semibold">Eligibility:</strong> {s.eligibility}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"{s.suitability}"</p>
+                        <p className="text-[10.5px] text-slate-500"><strong className="text-slate-600 dark:text-slate-400 font-semibold">Eligibility:</strong> {s.eligibility}</p>
                       </div>
 
-                      <div className="bg-white p-3 rounded-lg border text-center min-w-[110px] w-full md:w-auto shadow-sm flex-shrink-0">
+                      <div className="bg-white dark:bg-slate-800 p-3 rounded-lg border text-center min-w-[110px] w-full md:w-auto shadow-sm flex-shrink-0">
                         <span className="text-[9px] text-slate-400 uppercase font-bold block">Annual Yield</span>
                         <span className="text-lg font-black text-emerald-700 font-mono block my-0.5">{s.rate}%</span>
                         <span className="text-[9px] text-slate-500">{s.compounding}</span>
@@ -1500,9 +1486,9 @@ export default function App() {
         {activeTab === 'rules' && (
           <div className="space-y-6">
             {!selectedRuleScheme ? (
-              <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-4 md:p-6">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4 md:p-6">
                 <div className="mb-6">
-                  <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                  <h3 className="text-xl font-black text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
                     <span className="text-2xl">📚</span> Post Office Saving Schemes Reference
                   </h3>
                   <p className="text-sm text-slate-500 mt-1">Select a scheme below to view its detailed rules, conditions, and official features.</p>
@@ -1517,8 +1503,8 @@ export default function App() {
                     >
                       <div>
                         <div className="flex justify-between items-start mb-2">
-                          <span className="bg-white/20 text-white px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase shadow-sm">{s.id}</span>
-                          <span className="bg-white/10 text-white px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shadow-sm">{s.rate}%</span>
+                          <span className="bg-white dark:bg-slate-800/20 text-white px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase shadow-sm">{s.id}</span>
+                          <span className="bg-white dark:bg-slate-800/10 text-white px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shadow-sm">{s.rate}%</span>
                         </div>
                         <h4 className="font-black text-white text-base leading-tight mb-1 group-hover:text-yellow-300 transition-colors drop-shadow-sm">{s.name}</h4>
                         <span className="text-white/80 text-[9px] uppercase tracking-widest font-bold block mb-4">{s.hindiName}</span>
@@ -1531,7 +1517,7 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div className={`bg-gradient-to-tr ${selectedRuleScheme.color} p-5 md:p-8 text-white relative flex flex-col`}>
                   <button 
                     onClick={() => setSelectedRuleScheme(null)}
@@ -1541,7 +1527,7 @@ export default function App() {
                   </button>
                   
                   <div className="md:mt-10">
-                    <span className="bg-white/20 px-2.5 py-1 rounded text-[10px] font-black tracking-widest uppercase mb-3 inline-block shadow-sm">
+                    <span className="bg-white dark:bg-slate-800/20 px-2.5 py-1 rounded text-[10px] font-black tracking-widest uppercase mb-3 inline-block shadow-sm">
                       {selectedRuleScheme.id}
                     </span>
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-2 tracking-tight drop-shadow-sm leading-tight">{selectedRuleScheme.name}</h2>
@@ -1564,19 +1550,19 @@ export default function App() {
                   </div>
                 </div>
                 
-                <div className="p-4 md:p-8 space-y-8 bg-slate-50">
+                <div className="p-4 md:p-8 space-y-8 bg-slate-50 dark:bg-slate-900">
                   {Object.entries(SCHEME_DETAILS_DATA[selectedRuleScheme.id] || {}).map(([sectionTitle, bulletPoints], index) => (
-                    <div key={index} className="bg-white p-5 md:p-7 rounded-2xl border border-slate-200 shadow-sm relative pt-8 md:pt-10">
+                    <div key={index} className="bg-white dark:bg-slate-800 p-5 md:p-7 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative pt-8 md:pt-10">
                       <div className="absolute -top-3.5 left-4 md:left-6 bg-slate-800 text-white text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-md">
                         {sectionTitle}
                       </div>
                       <ul className="space-y-4">
                         {bulletPoints.map((pt, i) => (
                           <li key={i} className="flex items-start gap-3 md:gap-4">
-                            <span className="text-red-600 mt-1 flex-shrink-0 bg-red-100 rounded-full h-5 w-5 flex items-center justify-center font-bold text-xs">
+                            <span className="text-red-600 mt-1 flex-shrink-0 bg-red-100 dark:bg-red-900/50 rounded-full h-5 w-5 flex items-center justify-center font-bold text-xs">
                               {i + 1}
                             </span>
-                            <span className="text-sm text-slate-700 leading-relaxed font-medium mt-0.5">{pt}</span>
+                            <span className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium mt-0.5">{pt}</span>
                           </li>
                         ))}
                       </ul>
@@ -1584,15 +1570,15 @@ export default function App() {
                   ))}
                   
                   {(!SCHEME_DETAILS_DATA[selectedRuleScheme.id]) && (
-                    <div className="text-center p-8 md:p-12 text-slate-500 bg-white rounded-2xl border-2 border-dashed border-slate-300">
+                    <div className="text-center p-8 md:p-12 text-slate-500 bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600">
                       <div className="text-4xl mb-3">📄</div>
-                      <p className="font-bold text-base text-slate-700">Detailed rule specification not digitally formulated for {selectedRuleScheme.id}.</p>
+                      <p className="font-bold text-base text-slate-700 dark:text-slate-300">Detailed rule specification not digitally formulated for {selectedRuleScheme.id}.</p>
                       <p className="text-sm mt-2">Please refer to the physical official notification gazette or visit a branch.</p>
                     </div>
                   )}
                 </div>
                 
-                <div className="p-4 bg-slate-100 border-t border-slate-200 flex justify-end">
+                <div className="p-4 bg-slate-100 border-t border-slate-200 dark:border-slate-700 flex justify-end">
                   <button 
                     onClick={() => {
                       setSelectedSchemeId(selectedRuleScheme.id);
@@ -1611,10 +1597,10 @@ export default function App() {
 
         {/* ==================== TAB 6: ADMIN RATES CONFIGURATION ==================== */}
         {activeTab === 'admin' && (
-          <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-4 md:p-6 mb-6">
-            <div className="mb-6 border-b border-slate-200 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 p-4 md:p-6 mb-6">
+            <div className="mb-6 border-b border-slate-200 dark:border-slate-700 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                <h3 className="text-xl font-black text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-2">
                   <span className="text-2xl">⚙️</span> Rates Administrator
                 </h3>
                 <p className="text-sm text-slate-500 mt-1">Update scheme interest rates globally. All calculators and projections will adapt dynamically to the localized rates specified below.</p>
@@ -1634,7 +1620,7 @@ export default function App() {
                   </div>
                   <button
                     onClick={() => signOut(auth)}
-                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs md:text-sm font-bold rounded-lg transition-colors flex-shrink-0"
+                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs md:text-sm font-bold rounded-lg transition-colors flex-shrink-0"
                   >
                     Current Sign Out
                   </button>
@@ -1650,13 +1636,13 @@ export default function App() {
             </div>
 
             {!adminUser ? (
-              <div className="text-center py-16 justify-center flex flex-col items-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+              <div className="text-center py-16 justify-center flex flex-col items-center bg-slate-50 dark:bg-slate-900 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700">
                 <div className="text-4xl mb-4">🔐</div>
-                <h4 className="text-lg font-bold text-slate-800 mb-2">Admin Access Required</h4>
+                <h4 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2">Admin Access Required</h4>
                 <p className="text-sm text-slate-500 max-w-sm mx-auto">Please sign in with authorized administrator credentials to update global interest rates.</p>
               </div>
             ) : adminUser.email !== 'teacherkalandi@gmail.com' ? (
-              <div className="text-center py-16 justify-center flex flex-col items-center bg-red-50 rounded-xl border-2 border-dashed border-red-200">
+              <div className="text-center py-16 justify-center flex flex-col items-center bg-red-50 dark:bg-red-900/30 rounded-xl border-2 border-dashed border-red-200">
                 <div className="text-4xl mb-4">⛔</div>
                 <h4 className="text-lg font-bold text-red-800 mb-2">Access Denied</h4>
                 <p className="text-sm text-red-600 max-w-sm mx-auto">You are logged in as <b>{adminUser.email}</b>. You do not have permission to view or modify the admin portal.</p>
@@ -1665,18 +1651,18 @@ export default function App() {
               <div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {schemes.map((s: any, index: number) => (
-                    <div key={s.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between hover:border-slate-300 transition-colors">
+                    <div key={s.id} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col justify-between hover:border-slate-300 dark:border-slate-600 transition-colors">
                       <div>
                         <div className="flex items-center gap-2.5 mb-1.5">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-black text-white bg-gradient-to-r ${s.color} shadow-sm`}>
                             {s.id}
                           </span>
-                          <span className="font-bold text-slate-800 text-sm">{s.name}</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{s.name}</span>
                         </div>
                         <p className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{s.hindiName}</p>
                       </div>
                       <div className="mt-auto">
-                        <label className="text-xs font-bold text-slate-600 block mb-2 px-1">Interest Rate (% p.a.)</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-2 px-1">Interest Rate (% p.a.)</label>
                         <div className="relative">
                           <input
                             type="number"
@@ -1690,7 +1676,7 @@ export default function App() {
                               newSchemes[index] = { ...newSchemes[index], rate: newRate };
                               setSchemes(newSchemes);
                             }}
-                            className="w-full px-4 py-3 border border-slate-300 rounded-lg text-lg font-black focus:outline-none focus:ring-2 focus:ring-red-600 text-slate-800"
+                            className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-lg font-black focus:outline-none focus:ring-2 focus:ring-red-600 text-slate-800 dark:text-slate-200"
                           />
                           <span className="absolute right-4 top-3 text-slate-400 font-black text-lg">%</span>
                         </div>
@@ -1732,11 +1718,12 @@ export default function App() {
 
         </div>
 
-        <div className="max-w-7xl mx-auto text-center border-t border-slate-800 pt-6 mt-6 text-[10px] text-slate-600">
+        <div className="max-w-7xl mx-auto text-center border-t border-slate-800 pt-6 mt-6 text-[10px] text-slate-600 dark:text-slate-400">
           &copy; 2026 India Post Savings Bank Support Suite. All computation calculations are subject to regulatory updates as per Government of India Gazette announcements. Refer to file "ACFROG~1_2.PDF" for standard baseline values.
         </div>
       </footer>
 
+    </div>
     </div>
   );
 }
