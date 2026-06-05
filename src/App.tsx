@@ -674,7 +674,7 @@ export default function App() {
             invested: calc.invested,
             interest: calc.interest,
             total: calc.total,
-            payoutDetails: `Quarterly passive payout of ${formatCurrency(calc.quarterlyPayout)}`
+            payoutDetails: `Quarterly passive payout of ${formatCurrency(calc.quarterlyPayout)} (equivalent to ${formatCurrency(calc.quarterlyPayout / 3)} monthly)`
           };
           break;
         }
@@ -1012,8 +1012,8 @@ export default function App() {
                         type="number"
                         pattern="[0-9]*"
                         inputMode="numeric"
-                        value={monthlyContribution}
-                        onChange={(e) => setMonthlyContribution(Number(e.target.value))}
+                        value={monthlyContribution || ''}
+                        onChange={(e) => setMonthlyContribution(Number(e.target.value) || 0)}
                         className="w-full pl-8 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-600"
                       />
                     </div>
@@ -1028,8 +1028,8 @@ export default function App() {
                         type="number"
                         pattern="[0-9]*"
                         inputMode="numeric"
-                        value={depositAmount}
-                        onChange={(e) => setDepositAmount(Number(e.target.value))}
+                        value={depositAmount || ''}
+                        onChange={(e) => setDepositAmount(Number(e.target.value) || 0)}
                         className="w-full pl-8 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-600"
                       />
                     </div>
@@ -1092,8 +1092,8 @@ export default function App() {
                               type="number"
                               pattern="[0-9]*"
                               inputMode="numeric"
-                              value={monthlyContribution}
-                              onChange={(e) => setMonthlyContribution(Number(e.target.value))}
+                              value={monthlyContribution || ''}
+                              onChange={(e) => setMonthlyContribution(Number(e.target.value) || 0)}
                               className="w-full pl-7 pr-3 py-3 sm:py-2 border border-slate-300 rounded-lg text-sm sm:text-xs focus:outline-none focus:ring-2 focus:ring-red-600 font-bold"
                             />
                           </div>
@@ -1107,8 +1107,8 @@ export default function App() {
                               type="number"
                               pattern="[0-9]*"
                               inputMode="numeric"
-                              value={depositAmount}
-                              onChange={(e) => setDepositAmount(Number(e.target.value))}
+                              value={depositAmount || ''}
+                              onChange={(e) => setDepositAmount(Number(e.target.value) || 0)}
                               className="w-full pl-7 pr-3 py-3 sm:py-2 border border-slate-300 rounded-lg text-sm sm:text-xs focus:outline-none focus:ring-2 focus:ring-red-600 font-bold"
                             />
                           </div>
